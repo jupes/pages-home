@@ -1,0 +1,833 @@
+<\!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Codebase Guide — Agentic Experience Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --sidebar-w: 280px;
+    --content-max: 860px;
+    --fg: #1a1a2e;
+    --fg-muted: #555;
+    --bg: #fff;
+    --bg-sidebar: #f8f9fb;
+    --bg-code: #f4f5f7;
+    --border: #e2e4e8;
+    --accent: #2563eb;
+    --accent-light: #dbeafe;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; font-family: 'Inter', system-ui, sans-serif;
+    color: var(--fg); background: var(--bg);
+    line-height: 1.7; font-size: 15px;
+  }
+
+  /* Sidebar */
+  .toc {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: var(--sidebar-w); background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    overflow-y: auto; padding: 24px 16px;
+    z-index: 10;
+  }
+  .toc h2 {
+    font-size: 13px; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--fg-muted); margin: 0 0 12px 0; padding: 0;
+  }
+  .toc ul {
+    list-style: none; margin: 0; padding: 0;
+  }
+  .toc li {
+    margin: 0;
+  }
+  .toc li a {
+    display: block; padding: 5px 8px; border-radius: 4px;
+    color: var(--fg); text-decoration: none; font-size: 13px;
+    font-weight: 500; transition: background .15s;
+  }
+  .toc li a:hover {
+    background: var(--accent-light); color: var(--accent);
+  }
+  .toc li.toc-sub a {
+    padding-left: 20px; font-weight: 400; color: var(--fg-muted);
+    font-size: 12.5px;
+  }
+
+  /* Main content */
+  .content {
+    margin-left: var(--sidebar-w);
+    max-width: var(--content-max);
+    padding: 40px 48px 80px;
+  }
+
+  /* Typography */
+  h1 {
+    font-size: 28px; font-weight: 700; margin: 0 0 8px;
+    border-bottom: 2px solid var(--accent); padding-bottom: 12px;
+  }
+  h2 {
+    font-size: 22px; font-weight: 600; margin: 48px 0 16px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 17px; font-weight: 600; margin: 32px 0 12px;
+    color: var(--fg);
+  }
+  p { margin: 0 0 16px; }
+  strong { font-weight: 600; }
+  code {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    background: var(--bg-code); padding: 2px 5px; border-radius: 3px;
+  }
+  pre {
+    background: var(--bg-code); border: 1px solid var(--border);
+    border-radius: 6px; padding: 16px; overflow-x: auto;
+    margin: 0 0 20px; line-height: 1.5;
+  }
+  pre code {
+    background: none; padding: 0; font-size: 13px;
+  }
+
+  /* Tables */
+  table {
+    border-collapse: collapse; width: 100%;
+    margin: 0 0 20px; font-size: 14px;
+  }
+  th, td {
+    text-align: left; padding: 10px 12px;
+    border: 1px solid var(--border);
+  }
+  th {
+    background: var(--bg-sidebar); font-weight: 600;
+    font-size: 13px;
+  }
+
+  /* File citation labels */
+  p > code:first-child {
+    color: var(--accent); font-weight: 500;
+  }
+
+  hr {
+    border: none; border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* Ordered/unordered lists */
+  ol, ul { margin: 0 0 16px; padding-left: 24px; }
+  li { margin-bottom: 6px; }
+  li > ul, li > ol { margin-top: 6px; margin-bottom: 0; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .toc { display: none; }
+    .content { margin-left: 0; padding: 24px 20px 60px; }
+  }
+
+  /* Active TOC highlight */
+  .toc li a.active {
+    background: var(--accent-light); color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<nav class="toc"><h2>Contents</h2><ul>
+  <li><a href="#section-0">1. TL;DR</a></li>
+  <li><a href="#section-1">2. System topology</a></li>
+  <li><a href="#section-2">3. Request flow walkthroughs</a></li>
+  <li class="toc-sub"><a href="#section-3">Walkthrough A — Read flow: "What is order ORD-1001?"</a></li>
+  <li class="toc-sub"><a href="#section-4">Walkthrough B — Destructive flow with confirmation: "Cancel order ORD-1001"</a></li>
+  <li><a href="#section-5">4. Component deep-dives</a></li>
+  <li class="toc-sub"><a href="#section-6">4.1 MCP server — tools barrel</a></li>
+  <li class="toc-sub"><a href="#section-7">4.2 MCP server — state machine</a></li>
+  <li class="toc-sub"><a href="#section-8">4.3 MCP server — REST client</a></li>
+  <li class="toc-sub"><a href="#section-9">4.4 MCP server — transport</a></li>
+  <li class="toc-sub"><a href="#section-10">4.5 Agent service — runtime architecture</a></li>
+  <li class="toc-sub"><a href="#section-11">4.6 Agent service — chat handler</a></li>
+  <li class="toc-sub"><a href="#section-12">4.7 Agent service — destructive-tool wrappers</a></li>
+  <li class="toc-sub"><a href="#section-13">4.8 Agent service — confirmation store</a></li>
+  <li class="toc-sub"><a href="#section-14">4.9 Agent service — MCP forwarder and registry</a></li>
+  <li class="toc-sub"><a href="#section-15">4.10 Agent service — think-trace handling</a></li>
+  <li class="toc-sub"><a href="#section-16">4.11 Agent service — session helpers</a></li>
+  <li class="toc-sub"><a href="#section-17">4.12 Admin chat UI — React island</a></li>
+  <li class="toc-sub"><a href="#section-18">4.13 Admin HTML host</a></li>
+  <li><a href="#section-19">5. Design decisions (ADR summary)</a></li>
+  <li><a href="#section-20">6. Build topology and dev workflow</a></li>
+  <li class="toc-sub"><a href="#section-21">Scripts</a></li>
+  <li class="toc-sub"><a href="#section-22">Build and run sequences</a></li>
+  <li class="toc-sub"><a href="#section-23">Jest configuration</a></li>
+  <li><a href="#section-24">7. Testing strategy overview</a></li>
+  <li><a href="#section-25">8. Known gaps and open items</a></li>
+  <li><a href="#section-26">9. File map</a></li>
+</ul></nav>
+
+<main class="content">
+<h1>Codebase Guide</h1>
+<h2 id="section-0">1. TL;DR</h2>
+<p>This repo implements a natural-language AI admin assistant for a mock e-commerce backend. A store admin opens the existing <code>/admin</code> page, types a question or command into an embedded chat panel, and the agent reads orders and products or performs confirmation-gated writes (cancellations, status transitions, price and description updates) against a seeded REST API. Reasoning runs entirely locally via Qwen3 on Ollama — no cloud LLM calls.</p>
+<p>The system is four processes wired with <code>concurrently</code> under a single <code>npm run dev</code>:</p>
+<ol>
+<li><strong>Mock REST API</strong> (starter code, port 3000) — the persistence layer, unmodified except for a tax-calculation bug fix.</li>
+<li><strong>MCP server</strong> (port 3100) — exposes six tools over Streamable HTTP, owns input validation, the strict order state machine, and REST calls into the mock API.</li>
+<li><strong>Agent service</strong> (port 3200) — Express app built on Google ADK (<code>@iqai/adk@0.8.5</code>) with a custom Ollama adapter. Owns the <code>/agent/chat</code> HTTP contract, two-step confirmation flow, destructive-tool gating, and think-trace stripping.</li>
+<li><strong>Vite dev server</strong> (dev-only, port 5173) — serves the React chat island standalone for UI iteration; production builds are static assets served by the mock API.</li>
+</ol>
+<p>There are two canonical code paths. A <strong>read</strong> (e.g. &quot;What is order ORD-1001?&quot;) flows from the browser through the agent service, which invokes the LLM, the LLM calls a read tool, the agent forwards that call over MCP to the MCP server, the MCP server fetches from the REST API, and the result unwinds back as chat text. A <strong>confirmed write</strong> (e.g. &quot;Cancel order ORD-1001&quot;) follows the same inbound path but the destructive-tool wrapper intercepts the LLM&#39;s tool call, issues a confirmation token, and returns a sentinel. The handler detects the sentinel and responds with a <code>pendingAction</code> payload. The UI renders Approve/Decline buttons. On approval, a second POST carries the token; the handler consumes it and forwards the held action directly to MCP — no LLM involved in the second turn.</p>
+<p>The most consequential design decisions: MCP as the tool transport instead of in-process adapters (ADR-7), giving the tool surface independent exercisability; a strict agent-side state machine layered on top of the permissive REST API (ADR-2); scoped two-step confirmation where only irreversible or money-touching actions are gated (ADR-3); and client-sends-history memory with server-side caps (ADR-5), avoiding server-side session persistence.</p>
+<hr>
+<h2 id="section-1">2. System topology</h2>
+<pre><code>                                       browser fetch
+  ┌─────────────────────────┐  POST /agent/chat   ┌──────────────────────────────┐
+  │  Admin Chat UI          │ ──────────────────▶  │  Agent Service               │
+  │  React island           │                      │  Express :3200               │
+  │  served from :3000      │  ◀──────────────────  │  ADK + Ollama + MCP client   │
+  │  /admin                 │  HTTP 200 JSON       │                              │
+  └─────────────────────────┘                      └──────────────┬───────────────┘
+                                                                  │
+                                                    MCP / Streamable HTTP
+                                                    POST :3100/mcp
+                                                                  │
+                                                                  ▼
+                                                   ┌──────────────────────────────┐
+                                                   │  MCP Server                  │
+                                                   │  Express :3100               │
+                                                   │  state machine + envelopes   │
+                                                   └──────────────┬───────────────┘
+                                                                  │
+                                                    HTTP JSON (GET/POST/PUT)
+                                                    synthetic /admin referer
+                                                                  │
+                                                                  ▼
+                                                   ┌──────────────────────────────┐
+                                                   │  Mock REST API (starter)     │
+                                                   │  Express :3000               │
+                                                   │  /api/orders, /api/products  │
+                                                   └──────────────────────────────┘
+</code></pre>
+<p><strong>Mock REST API</strong> (port 3000, entry point <code>src/server.ts</code>). The starter Express app serving seeded JSON data from <code>data/seed/</code>. Handles CRUD for orders, products, and promotions across three route files (<code>src/routes/orders.ts</code>, <code>src/routes/products.ts</code>, <code>src/routes/promotions.ts</code>). The API exposes endpoints like <code>GET /api/orders</code>, <code>GET /api/orders/number/:n</code>, <code>GET /api/products</code>, <code>POST /api/orders/:id/status</code>, <code>POST /api/orders/:id/cancel</code>, <code>PUT /api/products/:id</code>, and <code>PUT /api/products/:productId/variants/:variantId</code>. All responses are wrapped in <code>{ success: boolean, data: T }</code> envelopes.</p>
+<p>Writes are gated behind <code>enableDynamicMode()</code> (in <code>src/utils/storage.ts</code>), which is triggered by the <code>/api</code> middleware when either the HTTP method is PUT/POST/DELETE or the <code>Referer</code> header contains <code>/admin</code>:</p>
+<p><code>src/server.ts:190-198</code></p>
+<pre><code class="language-ts">app.use(&#39;/api&#39;, (req: Request, res: Response, next: NextFunction) =&gt; {
+  const referer = req.get(&#39;referer&#39;) || &#39;&#39;;
+  if (req.method === &#39;PUT&#39; || req.method === &#39;POST&#39; || req.method === &#39;DELETE&#39; || referer.includes(&#39;/admin&#39;)) {
+    enableDynamicMode();
+  }
+  next();
+});
+</code></pre>
+<p>On first write, seed data is copied from <code>data/seed/</code> to <code>data/dynamic/</code> for mutation; <code>data/dynamic/</code> is gitignored and recreated from seed on next write after deletion. The only change to starter code is a tax-calculation fix in <code>src/routes/orders.ts</code> (three locations: order creation, add-line-item, and update-line-item) where <code>totalPrice</code> was changed to exclude tax so that <code>grandTotal = subtotal - discount + shipping + taxTotal</code> doesn&#39;t double-count. The original code computed <code>totalPrice = (unitPrice * quantity) - discount + tax</code>, which caused tax to be counted both in <code>subtotal</code> (sum of <code>totalPrice</code>) and in <code>taxTotal</code> (sum of per-item <code>tax</code>).</p>
+<p><strong>MCP Server</strong> (port 3100, entry point <code>mcp-server/src/server.ts</code>). Exposes six tools (<code>getOrder</code>, <code>getProduct</code>, <code>cancelOrder</code>, <code>updateOrderStatus</code>, <code>updateProductPrice</code>, <code>updateProductDescription</code>) plus a <code>__ping</code> sanity tool over both Streamable HTTP (<code>/mcp</code>) and legacy SSE (<code>/sse</code> + <code>/messages</code>). Owns all input validation, the strict order state machine, and REST calls via its <code>RestClient</code>. Every failure is normalized into an <code>ErrorEnvelope</code> before leaving the server.</p>
+<p><strong>Agent Service</strong> (port 3200, entry point <code>agent-service/src/server.ts</code>). Express app with a single endpoint <code>POST /agent/chat</code>. Discovers MCP tools at startup via <code>McpToolRegistry</code> (which wraps ADK&#39;s <code>McpToolset</code>). Replaces the four destructive tool names with locally-built confirmation-gated wrappers. Runs one ADK agent loop per standard turn using a shared <code>InMemorySessionService</code> that persists conversation history across requests. Strips <code>&lt;think&gt;</code> traces from assistant output. Manages the <code>ConfirmationStore</code> for two-step writes.</p>
+<p><strong>Vite Dev Server</strong> (port 5173, dev-only, entry point <code>agent-service/admin-chat-ui/vite.config.ts</code>). Serves the React island standalone with a proxy to the agent service. Production builds emit <code>chat.js</code> and <code>chat.css</code> into <code>public/admin/chat/</code>, which the mock API serves as static assets.</p>
+<p><strong>Startup dependency order.</strong> The <code>concurrently</code> invocation in <code>package.json</code> starts <code>dev:api</code>, <code>dev:mcp</code>, and <code>dev:agent</code> in parallel, but the agent service&#39;s script uses <code>wait-on http://localhost:3000/health http://localhost:3100/health</code> to block until both the REST API and MCP server are healthy before launching. This ordering matters because the agent service&#39;s <code>McpToolRegistry</code> discovers tools at first use, and the <code>McpForwarder</code> connects lazily — but the <code>wait-on</code> ensures both dependencies are ready before the agent accepts its first <code>/agent/chat</code> request. Additionally, the agent service itself probes the MCP server&#39;s health endpoint on startup (<code>waitForMcpHealth</code> in <code>server.ts</code>, 30 attempts × 500ms) as a defense-in-depth measure, though this can be disabled with <code>AGENT_REQUIRE_MCP_HEALTH=false</code> for testing.</p>
+<p>The Vite dev server (port 5173) is started separately via <code>npm run dev:ui</code> and is only needed during UI development. Production builds are pre-compiled via <code>npm run build:ui</code> and served as static assets by the mock API, so the baseline run under <code>npm run dev</code> is three processes, not four.</p>
+<hr>
+<h2 id="section-2">3. Request flow walkthroughs</h2>
+<h3 id="section-3">Walkthrough A — Read flow: &quot;What is order ORD-1001?&quot;</h3>
+<p><strong>Step 1.</strong> The admin types the question and clicks Send. The <code>useAgentChat</code> hook in the React island fires a <code>fetch</code> POST to <code>http://localhost:3200/agent/chat</code> with the rolling message history and (on subsequent turns) the echoed <code>sessionId</code>.</p>
+<p><code>agent-service/admin-chat-ui/src/hooks/useAgentChat.ts:154-173</code></p>
+<pre><code class="language-ts">const send = useCallback(
+  async (text: string) =&gt; {
+    const trimmed = text.trim();
+    if (!trimmed || sending) return;
+    setSending(true);
+    setLastError(null);
+    const nextMessages: ChatMessage[] = [...messages, { role: &quot;user&quot;, content: trimmed }];
+    setMessages(nextMessages.slice(-maxRendered));
+    try {
+      const body: Record&lt;string, unknown&gt; = {
+        messages: nextMessages.map((m) =&gt; ({ role: m.role, content: m.content })),
+      };
+      if (sessionIdRef.current) body.sessionId = sessionIdRef.current;
+      const res = await post(body);
+      applyResponse(res);
+    } finally {
+      setSending(false);
+    }
+  },
+  [applyResponse, maxRendered, messages, post, sending],
+);
+</code></pre>
+<p><strong>Step 2.</strong> The handler validates the request body against <code>ChatRequestSchema</code> (zod). If <code>body.confirm</code> is absent (it is for a standard turn), we enter Path 2.</p>
+<p><code>agent-service/src/chat/handler.ts:81-92</code></p>
+<pre><code class="language-ts">const parsed = ChatRequestSchema.safeParse(req.body);
+if (!parsed.success) {
+  const issue = parsed.error.issues[0];
+  const where = issue?.path?.join(&quot;.&quot;) || &quot;body&quot;;
+  const reply: ChatResponseBody = {
+    sessionId: req.body?.sessionId ?? newSessionId(),
+    assistantText: `I couldn&#39;t act on that — invalid request at ${where}: ${issue?.message}`,
+    error: VALIDATION_ERROR(`invalid request at ${where}: ${issue?.message}`),
+  };
+  res.status(400).json(reply);
+  return;
+}
+</code></pre>
+<p><strong>Step 3.</strong> The handler trims the message history, looks up or creates a persistent ADK session keyed by <code>(appName=&#39;admin_agent&#39;, userId=&#39;admin&#39;, sessionId)</code> via the shared <code>InMemorySessionService</code>, then discovers MCP tools and builds the agent.</p>
+<p><code>agent-service/src/chat/handler.ts:176-184</code></p>
+<pre><code class="language-ts">let session = await deps.sessionService.getSession(APP_NAME, USER_ID, sessionId);
+if (!session) {
+  session = await deps.sessionService.createSession(
+    APP_NAME,
+    USER_ID,
+    undefined,
+    sessionId,
+  );
+}
+</code></pre>
+<p><strong>Step 4.</strong> The handler constructs an <code>LlmAgent</code> and <code>Runner</code> directly (not via <code>AgentBuilder</code>, which was found to mint a fresh session per build). Read tool handles from MCP discovery are included as-is; destructive tool names are replaced with gated wrappers. The runner&#39;s <code>runAsync</code> is invoked with the new user text.</p>
+<p><code>agent-service/src/chat/handler.ts:215-255</code></p>
+<pre><code class="language-ts">const agent = new LlmAgent({
+  name: APP_NAME,
+  description: &quot;Mock e-commerce admin assistant.&quot;,
+  model: llm,
+  instruction: [
+    &quot;You are an admin assistant for a mock e-commerce store.&quot;,
+    &quot;When the user asks you to take action on an order or product, use the available tools.&quot;,
+    // ... additional instruction lines
+  ].join(&quot;\n&quot;),
+  tools: handles.map((h) =&gt; h.tool),
+});
+const runner = new Runner({
+  appName: APP_NAME,
+  agent,
+  sessionService: deps.sessionService,
+});
+
+let raw = &quot;&quot;;
+for await (const event of runner.runAsync({
+  userId: USER_ID,
+  sessionId,
+  newMessage: { role: &quot;user&quot;, parts: [{ text: newUserText }] },
+})) {
+  raw += event.content?.parts?.map((p) =&gt; p.text ?? &quot;&quot;).join(&quot;&quot;) ?? &quot;&quot;;
+}
+</code></pre>
+<p><strong>Step 5.</strong> The LLM decides to call <code>getOrder</code>. Because <code>getOrder</code> is a read tool (not in <code>DESTRUCTIVE_TOOL_NAMES</code>), it passes through without any confirmation gating. ADK forwards the tool call to the MCP-discovered tool, which routes over Streamable HTTP to <code>mcp-server/src/server.ts</code>.</p>
+<p><strong>Step 6.</strong> Inside the MCP server, <code>getOrder</code> validates the input then calls <code>RestClient.request</code> with a GET to <code>/api/orders/number/ORD-1001</code>. The <code>RestClient</code> sets the synthetic <code>Referer: http://localhost:3000/admin</code> header on every call.</p>
+<p><code>mcp-server/src/tools/get-order.ts:48-57</code></p>
+<pre><code class="language-ts">const path = args.orderNumber
+  ? `/api/orders/number/${encodeURIComponent(args.orderNumber)}`
+  : `/api/orders/${encodeURIComponent(args.orderId!)}`;
+
+const result = await rest.request&lt;unknown&gt;({ method: &quot;GET&quot;, path });
+if (!result.ok) return errorResult(result.error);
+
+return {
+  content: [{ type: &quot;text&quot;, text: JSON.stringify(result.data, null, 2) }],
+};
+</code></pre>
+<p><strong>Step 7.</strong> The starter REST API at <code>GET /api/orders/number/:n</code> returns the full order JSON (status, line items, totals, addresses, timestamps). The <code>RestClient</code> unwraps the <code>{ success, data }</code> envelope, yielding just the order object.</p>
+<p><code>mcp-server/src/rest-client.ts:71-77</code></p>
+<pre><code class="language-ts">if (res.ok) {
+  const data = (await res.json()) as { data?: T; success?: boolean };
+  const unwrapped =
+    data &amp;&amp; typeof data === &quot;object&quot; &amp;&amp; &quot;data&quot; in data ? (data.data as T) : (data as T);
+  return { ok: true, status: res.status, data: unwrapped };
+}
+</code></pre>
+<p><strong>Step 8.</strong> The tool result (the order JSON as text content) returns through MCP to ADK, which feeds it back to the LLM. The LLM produces a natural-language summary.</p>
+<p><strong>Step 9.</strong> Back in the handler&#39;s event loop, the raw assistant text is accumulated. After the loop, <code>splitThink</code> separates any <code>&lt;think&gt;</code> preamble from the visible answer. The <code>extractPendingAction</code> check finds no sentinel (this was a read). The handler returns HTTP 200 with <code>{ sessionId, assistantText, assistantThoughts }</code>.</p>
+<p><code>agent-service/src/chat/handler.ts:260-285</code></p>
+<pre><code class="language-ts">const pending = issued[issued.length - 1] ?? extractPendingAction(raw);
+const { visible: cleanText, thoughts } = splitThink(raw);
+const assistantThoughts = thoughts.length &gt; 0 ? thoughts : undefined;
+
+if (pending) {
+  // ... pending path (not taken for reads)
+}
+
+res.status(200).json({ sessionId, assistantText: cleanText, assistantThoughts });
+</code></pre>
+<p><strong>Step 10.</strong> The <code>useAgentChat</code> hook receives the response and processes it through <code>applyResponse</code>: it stores the returned <code>sessionId</code> in <code>sessionIdRef</code> for subsequent turns, sets <code>lastError</code> from the response&#39;s <code>error</code> field (if any), sets <code>pending</code> from <code>pendingAction</code> (null for reads), and appends the assistant message to the rolling history. Before storing, the hook applies <code>stripThinkClient</code> — a defensive client-side strip of <code>&lt;think&gt;</code> blocks — to the assistant text. This guards against the <code>.62</code> regression where unstripped thinking text accumulated in the client&#39;s message history, causing the next turn&#39;s request body to exceed the server&#39;s 8,000-character content cap. The hook then caps the stored history to <code>maxRenderedTurns</code> (default 24) and React re-renders the chat transcript with the new bubble. If <code>assistantThoughts</code> is non-null and non-empty, the bubble includes a collapsed <code>&lt;details&gt;</code> element labeled &quot;Thoughts&quot; so reviewers can inspect the model&#39;s reasoning chain.</p>
+<h3 id="section-4">Walkthrough B — Destructive flow with confirmation: &quot;Cancel order ORD-1001&quot;</h3>
+<p><strong>Step 1–4.</strong> Identical to Walkthrough A through agent construction.</p>
+<p><strong>Step 5.</strong> The LLM decides to call <code>cancelOrder</code>. This name is in <code>DESTRUCTIVE_TOOL_NAMES</code>, so the LLM&#39;s tool call is handled by the locally-built wrapper, not the raw MCP tool.</p>
+<p><strong>Step 6.</strong> Inside <code>executeDestructive</code>, <code>requiresConfirmation(&quot;cancelOrder&quot;, args)</code> returns <code>true</code> (cancel is always gated). The wrapper calls <code>ConfirmationStore.issue</code> to create a single-use, TTL-bounded token scoped to this <code>sessionId</code>, builds a <code>PendingActionResult</code>, fires the <code>onPending</code> recorder, and returns the <code>PENDING_MARKER</code> sentinel as the tool result text. The MCP server is never called.</p>
+<p><code>agent-service/src/tools/destructive-tools.ts:109-123</code></p>
+<pre><code class="language-ts">if (requiresConfirmation(name, args)) {
+  const { token, expiresAt } = deps.store.issue(deps.sessionId, name, args);
+  const payload: PendingActionResult = {
+    marker: PENDING_MARKER,
+    tool: name,
+    args,
+    confirmationToken: token,
+    expiresAt,
+  };
+  deps.onPending?.(payload);
+  return `${PENDING_MARKER}${JSON.stringify(payload)}`;
+}
+</code></pre>
+<p><strong>Step 7.</strong> The handler&#39;s event loop completes. The <code>issued</code> array has one entry (from the <code>onPending</code> callback). The handler detects the pending action, strips any marker text from the visible response, builds a <code>pendingAction</code> block, and returns it in the HTTP 200 response.</p>
+<p><code>agent-service/src/chat/handler.ts:264-283</code></p>
+<pre><code class="language-ts">if (pending) {
+  const friendlyText = stripPendingFromText(cleanText);
+  const pendingBlock: PendingAction = {
+    tool: pending.tool,
+    args: pending.args,
+    confirmationToken: pending.confirmationToken,
+    expiresAt: pending.expiresAt,
+  };
+  const reply: ChatResponseBody = {
+    sessionId,
+    assistantText:
+      friendlyText.length &gt; 0
+        ? friendlyText
+        : `I&#39;d like to ${describeIntent(pending.tool, pending.args)}. Confirm?`,
+    assistantThoughts,
+    pendingAction: pendingBlock,
+  };
+  res.status(200).json(reply);
+  return;
+}
+</code></pre>
+<p><strong>Step 8.</strong> The React UI renders the <code>PendingCard</code> component with Approve and Decline buttons, showing the tool name and arguments in a details disclosure.</p>
+<p><strong>Step 9.</strong> The admin clicks Approve. The hook sends a second POST to <code>/agent/chat</code> with <code>confirm: { token: &quot;tok_...&quot;, decision: &quot;approve&quot; }</code> plus the accumulated message history.</p>
+<p><code>agent-service/admin-chat-ui/src/hooks/useAgentChat.ts:176-199</code></p>
+<pre><code class="language-ts">const respondToConfirm = useCallback(
+  async (decision: &quot;approve&quot; | &quot;decline&quot;) =&gt; {
+    if (!pending || sending) return;
+    setSending(true);
+    const userText = decision === &quot;approve&quot; ? &quot;Approve&quot; : &quot;Decline&quot;;
+    const nextMessages: ChatMessage[] = [
+      ...messages,
+      { role: &quot;user&quot;, content: userText },
+    ];
+    setMessages(nextMessages.slice(-maxRendered));
+    try {
+      const res = await post({
+        sessionId: sessionIdRef.current,
+        messages: nextMessages.map((m) =&gt; ({ role: m.role, content: m.content })),
+        confirm: { token: pending.confirmationToken, decision },
+      });
+      applyResponse(res);
+    } finally {
+      setSending(false);
+    }
+  },
+  [applyResponse, maxRendered, messages, pending, post, sending],
+);
+</code></pre>
+<p><strong>Step 10.</strong> The handler enters Path 1 (confirmation second turn). It calls <code>ConfirmationStore.consume(sessionId, token)</code>. The store validates: token exists, session matches, TTL not elapsed. On success, it returns the held action and deletes the entry (single-use).</p>
+<p><code>agent-service/src/confirmation/store.ts:48-56</code></p>
+<pre><code class="language-ts">consume(sessionId: string, token: string): ConsumeResult {
+  const action = this.entries.get(token);
+  if (!action) return { ok: false, code: &quot;INVALID_TOKEN&quot; };
+  this.entries.delete(token);
+  if (action.sessionId !== sessionId) return { ok: false, code: &quot;MISMATCHED_TOKEN&quot; };
+  if (action.expiresAt &lt;= this.now()) return { ok: false, code: &quot;EXPIRED_TOKEN&quot; };
+  return { ok: true, action };
+}
+</code></pre>
+<p><strong>Step 11.</strong> The handler calls <code>deps.forwarder.callTool(&quot;cancelOrder&quot;, args)</code>, which connects to the MCP server over Streamable HTTP and invokes the <code>cancelOrder</code> tool directly — no LLM is involved in this turn.</p>
+<p><strong>Step 12.</strong> Inside the MCP server, <code>cancelOrder</code> runs the existence preflight (GET the order), then calls <code>canTransition(order.status, &quot;cancelled&quot;)</code>. If the order is in a state that allows cancellation (e.g. <code>pending</code>), the tool POSTs to <code>/api/orders/:id/cancel</code> with reason and restockItems. If not (e.g. <code>shipped</code>), it returns a narrated refusal with <code>INVALID_ORDER_STATUS</code>.</p>
+<p><code>mcp-server/src/tools/cancel-order.ts:84-96</code></p>
+<pre><code class="language-ts">const decision = canTransition(order.status, &quot;cancelled&quot;);
+if (!decision.ok) {
+  return errorResult({
+    humanMessage: (decision.reason ?? &quot;Transition not allowed.&quot;).replace(/\bORD\b/g, idLabel),
+    remediationHint:
+      decision.errorCode === &quot;ORDER_TERMINAL&quot;
+        ? &quot;This order is final; nothing to cancel.&quot;
+        : &quot;Refunding may be the right action instead — try refund tools when implemented.&quot;,
+    errorCode: decision.errorCode ?? &quot;INVALID_ORDER_STATUS&quot;,
+    details: { currentStatus: order.status },
+  });
+}
+</code></pre>
+<p><strong>Step 13.</strong> The tool result returns through the forwarder to the handler, which extracts text content and returns HTTP 200 with the result. The response path mirrors Walkthrough A from step 10 onward.</p>
+<hr>
+<h2 id="section-5">4. Component deep-dives</h2>
+<h3 id="section-6">4.1 MCP server — tools barrel</h3>
+<p><code>mcp-server/src/tools/index.ts</code> is the single registration site. <code>registerAllTools(mcp, rest)</code> calls each tool&#39;s registration function, passing the shared <code>RestClient</code>. Each tool follows the same pattern: a zod schema for input validation, an async handler function that takes <code>(rest, args)</code> and returns a <code>CallToolResult</code>, and a registration function that wires the tool into the <code>McpServer</code> with its name, description, and input schema. Errors are normalized into <code>ErrorEnvelope</code>-shaped text content with <code>isError: true</code> and the envelope as <code>structuredContent</code> so both human-readable and machine-readable representations are available.</p>
+<p><strong><code>getOrder</code></strong> (<code>get-order.ts</code>). Accepts <code>orderNumber</code> (preferred) or <code>orderId</code>. Dispatches a GET to <code>/api/orders/number/:n</code> or <code>/api/orders/:id</code>. Returns the full order document as JSON text content. On 404, returns <code>ORDER_NOT_FOUND</code>.</p>
+<p><strong><code>getProduct</code></strong> (<code>get-product.ts</code>). Accepts <code>sku</code>, <code>productId</code>, or <code>nameQuery</code> with explicit priority: <code>productId</code> &gt; <code>sku</code> &gt; <code>nameQuery</code>. SKU lookup scans the full product listing via <code>GET /api/products?limit=200</code> (case-insensitive variant match) since SKUs live on variants and are not directly addressable by the REST API. Name lookup performs a case-insensitive substring match on <code>product.name</code>. If exactly one product matches, it&#39;s returned; if multiple match, the tool returns an <code>AMBIGUOUS_PRODUCT</code> error listing the candidates so the model can ask the admin which one they meant; if none match, <code>PRODUCT_NOT_FOUND</code>. The <code>productId</code> path is a direct GET to <code>/api/products/:id</code> with no listing scan needed.</p>
+<p><strong><code>cancelOrder</code></strong> (<code>cancel-order.ts</code>). The most complex write tool. First performs an existence preflight via GET to retrieve the order&#39;s current state. Then calls <code>canTransition(order.status, &quot;cancelled&quot;)</code> from the state machine. If the transition is refused (e.g. order is already shipped), the tool returns the narrated refusal with the <code>ORD</code> placeholder replaced by the actual order number or identifier. If allowed, it POSTs to <code>/api/orders/:id/cancel</code> with <code>reason</code> and <code>restockItems</code> (defaults to <code>true</code>). The response includes <code>previousStatus</code>, <code>newStatus</code>, and whether inventory was restocked. This tool deliberately uses the dedicated <code>/cancel</code> endpoint rather than the generic <code>/status</code> endpoint because the cancel endpoint handles inventory restocking and records the cancellation reason.</p>
+<p><strong><code>updateOrderStatus</code></strong> (<code>update-order-status.ts</code>). Three-stage write: existence preflight via GET, strict <code>canTransition(currentStatus, targetStatus)</code> check, then POST to <code>/api/orders/:id/status</code> with the validated status and optional reason. The <code>targetStatus</code> zod enum deliberately omits <code>cancelled</code> from its allowed values — this forces the LLM to use <code>cancelOrder</code> for cancellations, avoiding two paths for the same intent and ensuring every cancellation goes through the inventory-restocking path. Non-terminal transitions (e.g. <code>pending → confirmed</code>) auto-execute without confirmation; terminal transitions (<code>→ completed</code>, <code>→ refunded</code>) require admin approval per ADR-3.</p>
+<p><strong><code>updateProductPrice</code></strong> (<code>update-product-price.ts</code>). Validates <code>price &gt;= 0</code> before any REST call — this is genuinely additive because the starter REST endpoint accepts negative values without complaint. Resolution follows two paths: if <code>sku</code> is provided, it scans the full product listing (<code>GET /api/products?limit=200</code>) for a case-insensitive variant SKU match, then resolves both the parent <code>productId</code> and the <code>variantId</code>; if <code>(productId, variantId)</code> are provided directly, it GETs the product and finds the variant within it. The write is a PUT to <code>/api/products/:productId/variants/:variantId</code> with the new price. The response reports both <code>previousPrice</code> and <code>newPrice</code> so the model can narrate the change to the admin. Always gated by ADR-3 confirmation because price changes directly touch money.</p>
+<p><strong><code>updateProductDescription</code></strong> (<code>update-product-description.ts</code>). Resolves the product by SKU (scans the listing for a variant with a matching SKU, then uses the parent product&#39;s id) or by direct <code>productId</code>. The description is length-bounded at 1–4000 characters via zod validation before any REST call. PUTs to <code>/api/products/:id</code> with the new description field. The response reports <code>previousDescriptionLength</code> and <code>newDescriptionLength</code> so the model can confirm the change. This is the only write tool that auto-executes without confirmation — per ADR-3, text edits are reversible and don&#39;t warrant the friction of a confirmation step.</p>
+<h3 id="section-7">4.2 MCP server — state machine</h3>
+<p><code>mcp-server/src/state-machine/can-transition.ts</code> exports <code>canTransition(from: OrderStatus, to: OrderStatus): TransitionResult</code> where <code>TransitionResult</code> is <code>{ ok: boolean; reason?: string; errorCode?: string }</code>.</p>
+<p>The <code>ALLOWED</code> map defines legal outbound edges per status. Terminal states (<code>cancelled</code>, <code>refunded</code>) have empty outbound arrays. <code>completed</code> is semi-terminal: refund flows remain open.</p>
+<p>The function checks four conditions in order: unknown <code>from</code> or <code>to</code> status (<code>INVALID_ORDER_STATUS</code>), same-state no-op (<code>ORDER_ALREADY_IN_STATUS</code>), terminal source (<code>ORDER_TERMINAL</code>), and finally whether the target is in the allowed list.</p>
+<p><code>mcp-server/src/state-machine/can-transition.ts:79-117</code></p>
+<pre><code class="language-ts">export function canTransition(from: OrderStatus, to: OrderStatus): TransitionResult {
+  if (!isOrderStatus(from)) {
+    return { ok: false, reason: `Unknown current status &quot;${from}&quot;.`, errorCode: &quot;INVALID_ORDER_STATUS&quot; };
+  }
+  if (!isOrderStatus(to)) {
+    return { ok: false, reason: `Unknown target status &quot;${to}&quot;.`, errorCode: &quot;INVALID_ORDER_STATUS&quot; };
+  }
+  if (from === to) {
+    return { ok: false, reason: `Order is already ${from}; no change to make.`, errorCode: &quot;ORDER_ALREADY_IN_STATUS&quot; };
+  }
+  if (TERMINAL.has(from)) {
+    return { ok: false, reason: `Order is already ${from}, which is final — no further status changes are allowed.`, errorCode: &quot;ORDER_TERMINAL&quot; };
+  }
+  const allowed = ALLOWED[from];
+  if (!allowed.includes(to)) {
+    return { ok: false, reason: narrateRefusal(from, to, allowed), errorCode: &quot;INVALID_ORDER_STATUS&quot; };
+  }
+  return { ok: true };
+}
+</code></pre>
+<p>For common admin mistakes (e.g. trying to cancel a shipped order), <code>narrateRefusal</code> returns tailored messages like &quot;ORD is already shipped — please refund instead of cancelling.&quot; The <code>ORD</code> token is a placeholder that each calling tool replaces with the actual order number. The legal edges are documented in full in <code>docs/order-state-machine.md</code> (ADR-2). Key rules embodied: no resurrection from terminal states, no skipping fulfillment stages (<code>pending → shipped</code> is refused), no regressions past shipped, <code>on_hold</code> can resume to any active pre-fulfillment state, and <code>completed</code> is semi-terminal (refund flows remain open).</p>
+<h3 id="section-8">4.3 MCP server — REST client</h3>
+<p><code>mcp-server/src/rest-client.ts</code> is the sole HTTP client for the system. Three concerns:</p>
+<p>The synthetic <code>Referer: http://localhost:3000/admin</code> header is set on every request (configured via <code>McpConfig.apiReferer</code>). This satisfies the starter&#39;s <code>enableDynamicMode()</code> middleware, which gates writes on either a write HTTP method or a referer containing <code>/admin</code>.</p>
+<p><code>mcp-server/src/rest-client.ts:44-49</code></p>
+<pre><code class="language-ts">const headers: Record&lt;string, string&gt; = {
+  &quot;content-type&quot;: &quot;application/json&quot;,
+  referer: this.cfg.apiReferer,
+  ...req.headers,
+};
+</code></pre>
+<p>Retry policy: idempotent methods (GET, HEAD, OPTIONS) retry once on 5xx with linear backoff. POST/PUT/DELETE never retry — the two-step confirmation gives the admin explicit re-issue control. Timeout: 10 seconds via <code>AbortController</code>.</p>
+<p>Response normalization: the mock API wraps responses as <code>{ success, data, meta }</code>. The client unwraps <code>data</code> when present. Failures are normalized into <code>ErrorEnvelope</code> with remediation hints keyed by HTTP status (404 → &quot;Double-check the order number or SKU&quot;). Network exceptions (connection refused) become <code>UPSTREAM_UNREACHABLE</code>; <code>AbortError</code> from timeout becomes <code>UPSTREAM_TIMEOUT</code>. This ensures the agent layer never has to interpret a raw HTTP error — every failure is a structured envelope with a <code>humanMessage</code> the model can paraphrase back to the admin and an <code>errorCode</code> the UI can render in the footer.</p>
+<p><code>mcp-server/src/rest-client.ts:126-137</code></p>
+<pre><code class="language-ts">private envelopeFromException(err: unknown): ErrorEnvelope {
+  const isAbort = (err as { name?: string })?.name === &quot;AbortError&quot;;
+  return {
+    humanMessage: isAbort
+      ? &quot;The store API didn&#39;t respond in time.&quot;
+      : &quot;Couldn&#39;t reach the store API.&quot;,
+    remediationHint: &quot;Try again, or check that the API process is running.&quot;,
+    errorCode: isAbort ? &quot;UPSTREAM_TIMEOUT&quot; : &quot;UPSTREAM_UNREACHABLE&quot;,
+    details: { error: String(err) },
+  };
+}
+</code></pre>
+<h3 id="section-9">4.4 MCP server — transport</h3>
+<p><code>mcp-server/src/server.ts</code> creates the Express app and wires the MCP server via <code>attachDualTransport</code> from <code>mcp-server/src/transports.ts</code>. This function mounts two transport endpoints:</p>
+<p>Streamable HTTP on <code>/mcp</code> — the modern transport used by ADK, MCP Inspector, and Claude Desktop. Each client session gets its own <code>StreamableHTTPServerTransport</code> keyed by the <code>mcp-session-id</code> header.</p>
+<p>Legacy SSE on <code>/sse</code> (downstream) + <code>/messages</code> (upstream) — for interop with older MCP clients.</p>
+<p>Both transports share the same <code>McpServer</code> factory, so registered tools appear identically regardless of which transport a client uses. The <code>tools/list</code> discovery handshake is handled by the MCP SDK: the client sends <code>initialize</code> → <code>notifications/initialized</code> → <code>tools/list</code>, and the server responds with the registered tool schemas (including zod-derived JSON Schema for each tool&#39;s input).</p>
+<p>The choice of Streamable HTTP over stdio is deliberate (documented in ADR-7): stdio is designed for subprocess-managed servers, but these processes are already managed by <code>concurrently</code>. HTTP gives cleaner process independence, better observability, and compatibility with MCP Inspector and third-party MCP clients. The legacy SSE transport is retained for interop but is not used by the agent service in production.</p>
+<p><code>mcp-server/src/transports.ts:30-51</code></p>
+<pre><code class="language-ts">app.all(&quot;/mcp&quot;, async (req: Request, res: Response) =&gt; {
+  const sessionId = (req.headers[&quot;mcp-session-id&quot;] as string) || undefined;
+  let transport: StreamableHTTPServerTransport;
+  if (sessionId &amp;&amp; streamableTransports[sessionId]) {
+    transport = streamableTransports[sessionId];
+  } else {
+    transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: () =&gt; randomUUID(),
+      onsessioninitialized: (id) =&gt; {
+        streamableTransports[id] = transport;
+      },
+    });
+    transport.onclose = () =&gt; {
+      if (transport.sessionId) delete streamableTransports[transport.sessionId];
+    };
+    const server = buildServer();
+    await server.connect(transport);
+  }
+  await transport.handleRequest(req, res, req.body);
+});
+</code></pre>
+<h3 id="section-10">4.5 Agent service — runtime architecture</h3>
+<p>The <code>.59</code> refactor plan (<code>docs/plans/adk-session-refactor.md</code>) proposed an <code>AgentRuntime</code> class as a persistent wrapper around <code>InMemorySessionService</code>, <code>LlmAgent</code>, and <code>Runner</code>. That plan was <strong>deferred</strong> — the class file <code>agent-service/src/llm/agent-runtime.ts</code> does not exist.</p>
+<p>Instead, the handler in <code>agent-service/src/chat/handler.ts</code> implements the refactor&#39;s core insight directly: a single shared <code>InMemorySessionService</code> (instantiated once per process in <code>server.ts</code>) persists across requests. The handler looks up or creates a session for each request&#39;s <code>sessionId</code>, then constructs a fresh <code>LlmAgent</code> and <code>Runner</code> per request — but crucially, the same <code>SessionService</code> is reused, so ADK threads prior turns into <code>LlmRequest.contents</code> as proper chat-completion messages.</p>
+<p>The single-user model uses <code>appName: &quot;admin_agent&quot;</code> and <code>userId: &quot;admin&quot;</code> as constants. These, combined with the client&#39;s <code>sessionId</code>, form the primary key into the session service.</p>
+<h3 id="section-11">4.6 Agent service — chat handler</h3>
+<p><code>agent-service/src/chat/handler.ts</code> (~335 lines) is the largest file in the service. The high-level control flow:</p>
+<ol>
+<li><strong>Validate</strong> the request body against <code>ChatRequestSchema</code> (zod schemas in <code>chat/contract.ts</code>). On failure → 400 with <code>VALIDATION_ERROR</code>.</li>
+<li><strong>Mint or echo</strong> a <code>sessionId</code>. If absent, <code>newSessionId()</code> generates <code>sess_&lt;uuid&gt;</code>.</li>
+<li><strong>If <code>body.confirm</code> is present</strong> → Path 1 (confirmation second turn):<ul>
+<li>If <code>decision === &quot;decline&quot;</code> → consume (to remove) the token, return <code>DECLINED</code> envelope.</li>
+<li>Otherwise → <code>ConfirmationStore.consume(sessionId, token)</code>. On <code>INVALID_TOKEN</code>, <code>EXPIRED_TOKEN</code>, or <code>MISMATCHED_TOKEN</code> → 409 with the appropriate envelope.</li>
+<li>On success → call <code>forwarder.callTool(action.tool, action.args)</code> directly. Extract text content from the MCP result. Return 200.</li>
+<li>If no forwarder (test path) → acknowledge without dispatching.</li>
+</ul>
+</li>
+<li><strong>If <code>body.confirm</code> is absent</strong> → Path 2 (standard turn):<ul>
+<li><code>trimToWorkingWindow</code> caps the message array.</li>
+<li>Validate that the last message is from the user.</li>
+<li>Look up or create the persistent ADK session.</li>
+<li>Discover tools from <code>ToolRegistry.list()</code>. Filter out destructive names; replace with gated wrappers from <code>buildDestructiveToolHandles</code>.</li>
+<li>Build <code>LlmAgent</code> + <code>Runner</code>. Run <code>runner.runAsync</code> with the new user text.</li>
+<li>The event loop concatenates only text parts (tool-call/response events have no <code>.text</code>, yielding empty strings).</li>
+<li>Check for pending actions: first from the <code>issued</code> recorder (authoritative), then from <code>extractPendingAction</code> (text fallback).</li>
+<li><code>splitThink</code> separates thoughts from visible text.</li>
+<li>If pending → strip marker from visible text, build <code>pendingAction</code> block, return 200.</li>
+<li>Otherwise → return 200 with clean <code>assistantText</code> and optional <code>assistantThoughts</code>.</li>
+</ul>
+</li>
+</ol>
+<p>The system instruction text (defined inline in the handler, lines 219-234) includes explicit guidance against Hermes-style JSON tool calls — a Qwen3 regression observed in <code>.63</code> where the model printed <code>{&quot;name&quot;:&quot;cancelOrder&quot;,&quot;arguments&quot;:{...}}</code> as assistant text instead of using the function-calling channel. It also includes a cancellation-defaulting instruction that tells the model to dispatch <code>cancelOrder</code> immediately with <code>reason: &quot;Customer requested&quot;</code> when the admin doesn&#39;t supply a reason, preventing the model from looping (trying to look the order up first or asking for a reason).</p>
+<p>The handler also manages agent-originated error copy via <code>agent-service/src/errors/copy.ts</code>, which exports factory functions for six error envelopes: <code>VALIDATION_ERROR</code>, <code>CONFIRMATION_INVALID</code>, <code>CONFIRMATION_EXPIRED</code>, <code>CONFIRMATION_MISMATCHED</code>, <code>CONFIRMATION_DECLINED</code>, and <code>INTERNAL_ERROR</code>. Each produces a consistent <code>ErrorEnvelope</code> with admin-friendly <code>humanMessage</code> and <code>remediationHint</code> text. These are distinct from the MCP-originated envelopes (which flow through from the <code>RestClient</code> unchanged).</p>
+<h3 id="section-12">4.7 Agent service — destructive-tool wrappers</h3>
+<p><code>agent-service/src/tools/destructive-tools.ts</code> defines <code>DESTRUCTIVE_TOOL_NAMES</code> as a <code>ReadonlySet</code> of exactly four entries: <code>updateOrderStatus</code>, <code>cancelOrder</code>, <code>updateProductPrice</code>, <code>updateProductDescription</code>.</p>
+<p><code>executeDestructive(name, args, deps)</code> is the core function. If <code>requiresConfirmation(name, args)</code> returns true, it issues a token via <code>ConfirmationStore.issue</code>, builds a <code>PendingActionResult</code>, fires <code>deps.onPending</code>, and returns the <code>PENDING_MARKER</code> sentinel (<code>&quot;__PENDING_CONFIRMATION__&quot;</code>) concatenated with the JSON payload. If false, it forwards to the live MCP server via <code>McpForwarder.callTool</code> and returns the tool&#39;s text result.</p>
+<p>The gated vs. auto-execute split (from <code>confirmation/predicate.ts</code>): <code>cancelOrder</code> and <code>updateProductPrice</code> always gate. <code>updateOrderStatus</code> gates only when targeting terminal statuses (<code>cancelled</code>, <code>completed</code>, <code>refunded</code>); non-terminal moves auto-execute. <code>updateProductDescription</code> always auto-executes (text edits are reversible).</p>
+<p><code>extractPendingAction(text)</code> is a fallback parser that finds the <code>PENDING_MARKER</code> in free-form prose and extracts the JSON payload by depth-counting braces. The LLM tends to summarize tool results into its prose rather than echoing them verbatim, so the sentinel may appear embedded mid-sentence rather than at the start. The depth-counting approach handles nested JSON objects without requiring a fragile regex. Returns <code>null</code> if the marker is absent, no opening brace follows, braces are unbalanced, or the parsed JSON doesn&#39;t contain the expected <code>marker</code> field. In practice, the <code>onPending</code> recorder callback is the authoritative signal (it fires from the wrapper itself, regardless of what the LLM does with the tool result text), and <code>extractPendingAction</code> serves as a belt-and-suspenders fallback.</p>
+<h3 id="section-13">4.8 Agent service — confirmation store</h3>
+<p><code>agent-service/src/confirmation/store.ts</code> implements <code>ConfirmationStore</code>. <code>issue(sessionId, tool, args)</code> generates a <code>tok_&lt;uuid&gt;</code> token, stores the action with <code>createdAt</code> and <code>expiresAt</code> (TTL defaults to 5 minutes), and returns <code>{ token, expiresAt }</code>.</p>
+<p><code>consume(sessionId, token)</code> validates in order: existence (<code>INVALID_TOKEN</code>), then deletes the entry unconditionally (even on failure, to prevent replay — this is the &quot;delete first&quot; pattern that ensures a mismatched or expired token cannot be retried), checks session match (<code>MISMATCHED_TOKEN</code>), and checks TTL (<code>EXPIRED_TOKEN</code>). On success returns the held <code>PendingAction</code> containing the tool name, arguments, session affinity, and timestamps. The store also exposes a <code>size()</code> method used by integration tests to assert that tokens are properly cleaned up after consumption, decline, or expiry. The default TTL is 5 minutes (configurable via <code>CONFIRMATION_TTL_MS</code>), and the clock is injectable via the constructor for deterministic testing of expiry behavior.</p>
+<p>The predicate lives in <code>agent-service/src/confirmation/predicate.ts</code>. <code>requiresConfirmation(toolName, args)</code> is a pure function that encodes ADR-3&#39;s scope.</p>
+<p><code>agent-service/src/confirmation/predicate.ts:23-37</code></p>
+<pre><code class="language-ts">export function requiresConfirmation(
+  toolName: string,
+  args: Record&lt;string, unknown&gt;,
+): boolean {
+  if (toolName === &quot;cancelOrder&quot;) return true;
+  if (toolName === &quot;updateProductPrice&quot;) return true;
+
+  if (toolName === &quot;updateOrderStatus&quot;) {
+    const target = (args?.targetStatus ?? args?.status) as string | undefined;
+    if (!target) return true; // be safe if shape is wrong
+    return TERMINAL_ORDER_STATUSES.has(target);
+  }
+
+  return false;
+}
+</code></pre>
+<p><code>TERMINAL_ORDER_STATUSES</code> is the set <code>{ &quot;cancelled&quot;, &quot;completed&quot;, &quot;refunded&quot; }</code>. If the args don&#39;t specify a <code>targetStatus</code> at all, the predicate defaults to requiring confirmation (defensive). ADR-3 scopes confirmation to &quot;anything the admin can&#39;t cleanly undo or that directly touches money.&quot;</p>
+<h3 id="section-14">4.9 Agent service — MCP forwarder and registry</h3>
+<p><strong><code>McpToolRegistry</code></strong> (<code>agent-service/src/tools/mcp-registry.ts</code>) wraps ADK&#39;s <code>McpToolset</code>. On <code>list()</code>, it lazily initializes the toolset with <code>transport: { mode: &quot;sse&quot;, serverUrl }</code> (the bundled SDK client negotiates Streamable HTTP first). The returned <code>BaseTool</code> instances are what the LLM agent sees for read tools. The <code>ToolRegistry</code> interface (<code>agent-service/src/tools/registry.ts</code>) abstracts this behind <code>list()</code> and <code>close()</code>, enabling <code>InProcessToolRegistry</code> for tests.</p>
+<p><strong><code>McpForwarder</code></strong> (<code>agent-service/src/tools/mcp-forwarder.ts</code>) is a separate thin MCP client used for two purposes: auto-executing destructive tools that pass the confirmation predicate, and executing held actions on the approval second turn. It exists separately from <code>McpToolset</code> because those call sites already know exactly what to invoke — they don&#39;t need ADK&#39;s agent loop. The forwarder lazy-connects via <code>StreamableHTTPClientTransport</code> and caches the <code>Client</code> instance. Connection is guarded against concurrent initialization by storing the in-flight <code>Promise</code>.</p>
+<p><code>agent-service/src/tools/mcp-forwarder.ts:43-48</code></p>
+<pre><code class="language-ts">async callTool(name: string, args: Record&lt;string, unknown&gt;): Promise&lt;CallToolResult&gt; {
+  await this.connect();
+  if (!this.client) throw new Error(&quot;MCP forwarder failed to initialize&quot;);
+  const result = (await this.client.callTool({ name, arguments: args })) as CallToolResult;
+  return result;
+}
+</code></pre>
+<p>The Ollama LLM factory (<code>agent-service/src/llm/ollama.ts</code>) wraps <code>ollama-ai-provider-v2</code> (pinned at v1.5.5 for LanguageModel V2 compatibility with ADK 0.8.5) and returns an <code>AiSdkLlm</code>. The pin avoids the LanguageModel V2/V3 spec mismatch that v3.5.0 would re-introduce. A side effect of this pin is that Qwen3&#39;s <code>message.thinking</code> field (containing chain-of-thought) is dropped by the provider before the AI SDK sees it, which is why <code>assistantThoughts</code> is often <code>null</code> in practice — the <code>splitThink</code> extractor handles the inline <code>&lt;think&gt;</code> markers when the model does emit them. Investigation is documented in <code>docs/thoughts-dropdown-investigation.md</code>.</p>
+<h3 id="section-15">4.10 Agent service — think-trace handling</h3>
+<p><code>agent-service/src/chat/strip-think.ts</code> handles four Qwen3 output shapes in a compositional pipeline.</p>
+<p><code>splitThink(input)</code> returns <code>{ visible, thoughts }</code>. It processes three passes sequentially, each a no-op when its target is absent:</p>
+<ol>
+<li><strong>Paired tags</strong>: regex <code>/&lt;think&gt;([\s\S]*?)&lt;\/think&gt;/gi</code> captures thought content and removes the blocks.</li>
+<li><strong>Orphan open</strong>: regex <code>/&lt;think&gt;([\s\S]*)$/i</code> catches an unterminated <code>&lt;think&gt;</code> block at the end of the string.</li>
+<li><strong>Bare close</strong>: if any <code>&lt;/think&gt;</code> tags survive passes 1 and 2, the text before the last <code>&lt;/think&gt;</code> is treated as thought content, and only the text after it becomes visible. This handles the case where Qwen3 starts thinking implicitly (no opening tag) and only marks the end.</li>
+</ol>
+<p>The <code>.62</code> regression was a <strong>mixed pattern</strong>: <code>&lt;think&gt;cycle1&lt;/think&gt;cycle2&lt;/think&gt;final</code>. Pass 1 consumed the paired block but left <code>cycle2&lt;/think&gt;final</code>. Without pass 3, the leftover rode along as visible text, and on the next turn the 8000-char content cap rejected it. The compositional design fixed this: pass 3 now catches any bare <code>&lt;/think&gt;</code> that pass 1 didn&#39;t consume.</p>
+<p><code>stripThink(input)</code> is a backward-compatible wrapper that returns just <code>visible</code>.</p>
+<p><code>agent-service/src/chat/strip-think.ts:47-76</code></p>
+<pre><code class="language-ts">export function splitThink(input: string): { visible: string; thoughts: string } {
+  if (!input) return { visible: &quot;&quot;, thoughts: &quot;&quot; };
+  const captured: string[] = [];
+  let body = input;
+  body = body.replace(THINK_PAIR, (_match, inner: string) =&gt; {
+    captured.push(inner.trim());
+    return &quot;&quot;;
+  });
+  if (body.includes(OPEN_TAG)) {
+    body = body.replace(ORPHAN_OPEN, (_match, inner: string) =&gt; {
+      captured.push(inner.trim());
+      return &quot;&quot;;
+    });
+  }
+  if (body.includes(CLOSE_TAG)) {
+    const lastClose = body.lastIndexOf(CLOSE_TAG);
+    const thoughtSection = body.slice(0, lastClose);
+    body = body.slice(lastClose + CLOSE_TAG.length);
+    for (const piece of thoughtSection.split(CLOSE_TAG)) {
+      const trimmed = piece.trim();
+      if (trimmed.length &gt; 0) captured.push(trimmed);
+    }
+  }
+  return finalize(body, captured);
+}
+</code></pre>
+<h3 id="section-16">4.11 Agent service — session helpers</h3>
+<p><code>agent-service/src/chat/session.ts</code> exports three functions.</p>
+<p><code>newSessionId()</code> generates <code>sess_&lt;uuid&gt;</code> using Node&#39;s <code>crypto.randomUUID</code>.</p>
+<p><code>trimToWorkingWindow(messages)</code> caps the client-supplied history to <code>MAX_TURNS * 2</code> messages (default 16, i.e. 8 user/assistant pairs). Older messages are silently dropped.</p>
+<p><code>buildContextualPrompt(messages)</code> is marked <code>@deprecated</code>. It was the pre-<code>.59</code> workaround that bundled prior turns into an XML-fenced prompt string. It has no production callers — the handler now uses the persistent <code>SessionService</code> instead. Kept in place so reverting <code>.59</code> is a one-commit operation. Scheduled for deletion in <code>.60</code>.</p>
+<h3 id="section-17">4.12 Admin chat UI — React island</h3>
+<p>Source lives in <code>agent-service/admin-chat-ui/src/</code>. Three files:</p>
+<p><strong><code>vite.config.ts</code></strong> configures a library-mode build: entry at <code>src/main.tsx</code>, ESM output with stable filenames (<code>chat.js</code>, <code>chat.css</code>), emitted to <code>../../public/admin/chat/</code>. <code>process.env.NODE_ENV</code> is defined to <code>&quot;production&quot;</code> at build time to avoid a <code>ReferenceError</code> in the browser. Dev server on port 5173 proxies <code>/agent</code> to <code>http://localhost:3200</code>.</p>
+<p><strong><code>main.tsx</code></strong> auto-mounts on <code>DOMContentLoaded</code>. Looks for <code>&lt;div id=&quot;agent-chat-root&quot;&gt;</code>; if absent, silently no-ops. Renders <code>&lt;App /&gt;</code> inside <code>&lt;StrictMode&gt;</code>.</p>
+<p><strong><code>useAgentChat.ts</code></strong> is the hook that owns the chat state machine. States: idle (no messages), sending (fetch in flight), awaiting-confirmation (<code>pending</code> is non-null), done (result rendered). It maintains a rolling <code>messages</code> array (capped at <code>maxRenderedTurns</code>, default 24), a <code>sessionIdRef</code> echoed across turns, <code>pending</code> (the current <code>PendingAction</code> or null), <code>lastError</code> (the most recent <code>ErrorEnvelope</code>), and <code>sending</code> (boolean).</p>
+<p>The hook includes <code>stripThinkClient</code>, a defensive client-side <code>&lt;think&gt;</code> strip applied before storing assistant text in history. This guards against the <code>.62</code> regression where leaked thinking text caused the next request to exceed the 8000-char content cap.</p>
+<p><strong><code>App.tsx</code></strong> renders three regions: header (title + reset button), transcript (scrollable bubble list with inline <code>PendingCard</code> when confirmation is needed), and composer (textarea + send button, disabled during sending or when a pending action awaits resolution). The <code>PendingCard</code> component shows the tool name, a human-readable summary via <code>describeTool</code>, args in a <code>&lt;details&gt;</code> disclosure, and Approve/Decline buttons. Empty state shows clickable example prompts that populate (not send) the draft.</p>
+<h3 id="section-18">4.13 Admin HTML host</h3>
+<p><code>public/admin.html</code> is the starter&#39;s admin page. The chat island is mounted via two additions:</p>
+<p><code>public/admin.html:8-9</code></p>
+<pre><code class="language-html">&lt;link rel=&quot;stylesheet&quot; href=&quot;/admin/chat/chat.css&quot;&gt;
+</code></pre>
+<p><code>public/admin.html:23-26</code></p>
+<pre><code class="language-html">&lt;section class=&quot;section&quot;&gt;
+  &lt;h2&gt;Agent&lt;/h2&gt;
+  &lt;div id=&quot;agent-chat-root&quot;&gt;&lt;/div&gt;
+&lt;/section&gt;
+</code></pre>
+<p><code>public/admin.html:106-107</code></p>
+<pre><code class="language-html">&lt;script src=&quot;/admin/admin.js&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;module&quot; src=&quot;/admin/chat/chat.js&quot;&gt;&lt;/script&gt;
+</code></pre>
+<p>The <code>chat.js</code> bundle loads as an ES module, finds <code>#agent-chat-root</code>, and mounts the React island. The existing admin JS and CSS (<code>admin.js</code>, <code>admin.css</code>) are untouched.</p>
+<hr>
+<h2 id="section-19">5. Design decisions (ADR summary)</h2>
+
+<table>
+<thead>
+<tr>
+<th>ADR</th>
+<th>Title</th>
+<th>Decision</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ADR-1</td>
+<td>Same repo, separate processes, <code>concurrently</code></td>
+<td>Four processes in one repo, started via <code>concurrently</code> with health-gated startup.</td>
+<td>The assignment draws three layers and names separation of concerns as an evaluation axis; colocating would blur that boundary.</td>
+</tr>
+<tr>
+<td>ADR-2</td>
+<td>Strict agent-side transition subset</td>
+<td>The MCP server enforces a documented state machine stricter than the permissive REST API, refusing transitions before any write.</td>
+<td>The assessment explicitly requires transition validation; mirroring a permissive backend 1:1 means no real validation story.</td>
+</tr>
+<tr>
+<td>ADR-3</td>
+<td>Scoped two-step confirmation</td>
+<td>Destructive/irreversible writes and price changes require admin approval; description edits and non-terminal status moves auto-execute.</td>
+<td>Confirming every text edit adds friction without safety payoff; anything that can&#39;t be cleanly undone or touches money is gated.</td>
+</tr>
+<tr>
+<td>ADR-4</td>
+<td>JSON transport, streaming deferred</td>
+<td>Each agent turn is a single HTTP round-trip; no SSE streaming in v1.</td>
+<td>With two-step confirmation, turns are short; streaming&#39;s payoff on long generations doesn&#39;t apply.</td>
+</tr>
+<tr>
+<td>ADR-5</td>
+<td>Client-sends-full-history</td>
+<td>Client sends message history each turn; server caps at 16 messages and trims to 8 turn pairs.</td>
+<td>Zero server-side conversation state; simplicity and no persistence requirement. (Post-<code>.59</code>, the <code>InMemorySessionService</code> is the actual source of truth, but the body cap remains as validation hygiene.)</td>
+</tr>
+<tr>
+<td>ADR-6</td>
+<td>Qwen3 smallest-viable first</td>
+<td>Start at <code>qwen3:4b</code>, scale up only if tool-calling reliability requires it; <code>qwen3:8b</code> is the current default.</td>
+<td>Assignment requires Qwen3 ≤30B; tool-calling quality drops on tiny models but large models won&#39;t run on 8 GB.</td>
+</tr>
+<tr>
+<td>ADR-7</td>
+<td>Tool surface ships as MCP server</td>
+<td>The agent&#39;s tools are served by a local MCP server over Streamable HTTP, not as in-process adapters.</td>
+<td>Mirrors real-world agent tooling (Claude Desktop, Claude Code); tool surface is independently exercisable by any MCP client; clean protocol boundary.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="section-20">6. Build topology and dev workflow</h2>
+<h3 id="section-21">Scripts</h3>
+<p>From <code>package.json</code>:</p>
+<pre><code class="language-json">&quot;dev:api&quot;: &quot;ts-node --transpile-only src/server.ts&quot;,
+&quot;dev:mcp&quot;: &quot;ts-node --transpile-only mcp-server/src/server.ts&quot;,
+&quot;dev:agent&quot;: &quot;wait-on http://localhost:3000/health http://localhost:3100/health &amp;&amp; ts-node --transpile-only agent-service/src/server.ts&quot;,
+&quot;dev&quot;: &quot;concurrently -k -n api,mcp,agent -c blue,magenta,green \&quot;npm:dev:api\&quot; \&quot;npm:dev:mcp\&quot; \&quot;npm:dev:agent\&quot;&quot;,
+&quot;dev:ui&quot;: &quot;npm --prefix agent-service/admin-chat-ui run dev&quot;,
+&quot;build:ui&quot;: &quot;npm --prefix agent-service/admin-chat-ui run build&quot;,
+&quot;install:ui&quot;: &quot;npm --prefix agent-service/admin-chat-ui install --no-audit --no-fund&quot;,
+&quot;test&quot;: &quot;jest&quot;,
+&quot;test:watch&quot;: &quot;jest --watch&quot;
+</code></pre>
+<h3 id="section-22">Build and run sequences</h3>
+<p><strong>Install:</strong> <code>npm install --legacy-peer-deps</code> (the <code>--legacy-peer-deps</code> flag is required because <code>@iqai/adk@0.8.5</code> declares a <code>zod@^3</code> peer while the rest of the stack uses <code>zod@^4</code>; the resolution is safe at runtime — see <code>docs/adk-ollama-adapter.md</code> — but npm 9+ refuses to resolve without the flag). Then <code>npm run install:ui</code> for the chat UI sub-package, which has its own <code>package.json</code> under <code>agent-service/admin-chat-ui/</code> with React, Vite, and the <code>@vitejs/plugin-react</code> dependency.</p>
+<p><strong>Build UI:</strong> <code>npm run build:ui</code> runs Vite in library mode, emitting <code>public/admin/chat/chat.js</code> (an ES module bundle) and <code>public/admin/chat/chat.css</code> (the chat island&#39;s styles). The output directory is emptied before each build (<code>emptyOutDir: true</code>). File names are stable (no content hashes) because the bundle is loaded as a module script from <code>admin.html</code>, and cache-busting is not a concern for a dev/review artifact. The built assets are committed to the repo so a reviewer can run the project without needing to build the UI separately.</p>
+<p><strong>Dev:</strong> <code>npm run dev</code> starts the three services via <code>concurrently</code>. The <code>-k</code> flag kills all on any exit. The agent service&#39;s <code>wait-on</code> blocks until both REST API and MCP server health endpoints respond.</p>
+<p><strong>Test:</strong> <code>npm test</code> runs Jest across all three roots. <code>npm run test:watch</code> for interactive mode. <code>npm run test:coverage</code> for coverage reports.</p>
+<p><strong>Live-Ollama tests auto-skip:</strong> The two live-Ollama test files probe <code>http://localhost:11434/api/tags</code> with a 2-second timeout in <code>beforeAll</code>. If Ollama isn&#39;t reachable, the suite is skipped with a warning. They can also be force-skipped with <code>SKIP_E2E_READ=1</code>.</p>
+<h3 id="section-23">Jest configuration</h3>
+<p><code>jest.config.js</code> discovers tests across three roots: <code>src/</code> (starter), <code>agent-service/src/</code>, and <code>mcp-server/src/</code>. Pattern: <code>**/__tests__/**/*.test.ts</code>. <code>maxWorkers: 1</code> enforces serial execution to avoid state conflicts on the shared JSON fixture files that the mock REST API reads and writes. <code>setupFilesAfterEnv</code> points to <code>src/__tests__/setup.ts</code>, which resets the starter API&#39;s dynamic data between tests. <code>ts-jest</code> runs in <code>isolatedModules</code> mode to sidestep the V2/V3 LanguageModel typing skew between <code>@iqai/adk</code> and the broader AI SDK ecosystem.</p>
+<hr>
+<h2 id="section-24">7. Testing strategy overview</h2>
+<p>See <code>docs/test-coverage-review.md</code> for the full test inventory (264 tests across 24 files). This section describes the strategy layers.</p>
+<p><strong>Pure-function unit tests</strong> cover the state machine (<code>can-transition.ts</code> — exhaustive transition matrix, 15 tests) and think-trace stripping (<code>strip-think.ts</code> — all four Qwen3 output shapes including the <code>.62</code> mixed-pattern regression, 20 tests). These are the cheapest tests: no I/O, no mocks, deterministic. They earn their keep by pinning exact behavioral contracts on the two components most likely to regress under model or framework changes.</p>
+<p><strong>Fake-fetch isolation tests</strong> cover the six MCP tools (<code>get-order</code>, <code>get-product</code>, <code>cancel-order</code>, <code>update-order-status</code>, <code>update-product-price</code>, <code>update-product-description</code> — 28 tests total) and the <code>RestClient</code> (6 tests). Each test injects a fake <code>fetch</code> into <code>RestClient</code>, so the validation layer, state-machine integration, and HTTP wiring are exercised without a live API. This layer proves that each tool&#39;s input validation, error mapping, and REST call shape are correct independently.</p>
+<p><strong>In-process REST+MCP integration tests</strong> (9 tests in <code>confirmation-flow.test.ts</code>) boot the starter REST API and MCP server in-process and drive the two-step confirmation flow end-to-end: token issuance, approval, decline, expiry, auto-execute, state-machine refusal, MCP-Inspector parity. No LLM is involved — a deterministic driver calls <code>executeDestructive</code> and the forwarder directly. This layer proves the plumbing works.</p>
+<p><strong>Stub-LLM contract tests</strong> cover the <code>/agent/chat</code> HTTP contract (10 tests) and multi-turn history threading (3 tests). The contract tests use a stub LLM that&#39;s never actually invoked — the handler&#39;s structural behavior (validation, session minting, confirmation dispatch) is under test. The multi-turn tests use a recording stub <code>BaseLlm</code> that captures <code>LlmRequest.contents</code> across three sequential POSTs, proving the shared <code>InMemorySessionService</code> threads history correctly.</p>
+<p><strong>Live-Ollama end-to-end tests</strong> (2 tests, auto-skipped when Ollama is unreachable) drive the full stack with a real Qwen3 model. The read test (<code>end-to-end-read.test.ts</code>) boots the starter REST API, MCP server, and agent service in-process, then POSTs a prompt like &quot;Use the getOrder tool to look up ORD-1001&quot; and asserts the response contains the order number. The cancel test (<code>end-to-end-cancel.test.ts</code>) drives the full two-step confirmation flow: turn 1 prompts cancellation, turn 2 sends the approval with the held token, and the test verifies the order&#39;s REST status actually becomes <code>cancelled</code>. The cancel test is intentionally lenient — it accepts a soft fallback if the model doesn&#39;t emit <code>pendingAction</code> (passing as long as the assistant text mentions the order number) — because small-model tool-calling is variable and a strict assertion would make the test flaky on different hardware.</p>
+<hr>
+<h2 id="section-25">8. Known gaps and open items</h2>
+<p>These are gaps acknowledged in the existing documentation (<code>docs/test-coverage-review.md</code> and <code>docs/plans/adk-session-refactor.md</code>).</p>
+<p><strong>No per-session event cap.</strong> The <code>InMemorySessionService</code> accumulates events indefinitely on a single <code>sessionId</code>. A long-running chat will eventually exceed the model&#39;s context window. The refactor plan sketches a 32-event cap with tool-call/response pair preservation at the boundary; it was scoped out of <code>.59</code> to keep that commit small. Impact: only matters for extended single-session chats; restarting the process or rotating <code>sessionId</code> is a workaround.</p>
+<p><strong>No live-LLM regression test for multi-turn intent threading.</strong> The <code>.59</code> refactor is validated by structural assertions (stub LLM proves history reaches <code>LlmRequest.contents</code>), but no automated test proves <code>qwen3:8b</code> actually reasons over that history correctly. Verification depends on manual UI testing. Impact: a model or provider regression could silently break follow-up turns.</p>
+<p><strong>No automated test of the UI&#39;s defensive <code>stripThinkClient</code>.</strong> The bundle integrity tests confirm the file ships and references the right mount ID. The strip function itself is not exercised by any test. Impact: a regression in the client-side strip could re-introduce the <code>.62</code> content-cap overflow.</p>
+<p><strong><code>tools/list</code> discovery test covers only Phase 3 tools.</strong> The four Phase 4 destructive tools are registered but not asserted in the MCP discovery test. Impact: a registration regression would not be caught at the discovery level (though individual tool tests would still fail).</p>
+<p><strong><code>buildContextualPrompt</code> is deprecated but not deleted.</strong> Scheduled for removal in <code>.60</code> after live UI verification of <code>.59</code>. Five tests cover it in <code>session.test.ts</code>. No production callers exist. Impact: dead code; harmless but clutters the test count.</p>
+<hr>
+<h2 id="section-26">9. File map</h2>
+<pre><code>agent-service/src/server.ts                     — Express app factory; wires SessionService, ConfirmationStore, forwarder, handler.
+agent-service/src/config.ts                      — Env-driven runtime config (ports, Ollama model, TTL, MCP URL).
+agent-service/src/chat/handler.ts                — POST /agent/chat handler; Path 1 (confirm), Path 2 (standard turn).
+agent-service/src/chat/contract.ts               — Zod schemas for request validation (ChatRequestSchema).
+agent-service/src/chat/session.ts                — newSessionId, trimToWorkingWindow, deprecated buildContextualPrompt.
+agent-service/src/chat/strip-think.ts            — splitThink / stripThink; removes Qwen3 &lt;think&gt; preambles.
+agent-service/src/tools/registry.ts              — ToolRegistry interface (list + close); ADR-7 abstraction.
+agent-service/src/tools/mcp-registry.ts          — McpToolRegistry: wraps ADK McpToolset for MCP tool discovery.
+agent-service/src/tools/mcp-forwarder.ts         — McpForwarder: thin MCP client for direct tool invocation.
+agent-service/src/tools/destructive-tools.ts     — Gated wrappers for the four write tools; PENDING_MARKER sentinel.
+agent-service/src/confirmation/store.ts          — ConfirmationStore: issue, consume, TTL, session-scoped tokens.
+agent-service/src/confirmation/predicate.ts      — requiresConfirmation(toolName, args) predicate (ADR-3).
+agent-service/src/llm/ollama.ts                  — buildOllamaLlm: wraps ollama-ai-provider-v2 as ADK AiSdkLlm.
+agent-service/src/errors/copy.ts                 — Canned ErrorEnvelope factories for agent-originated errors.
+agent-service/admin-chat-ui/vite.config.ts       — Vite library-mode build; emits chat.js + chat.css.
+agent-service/admin-chat-ui/src/main.tsx          — React island entry; auto-mounts to #agent-chat-root.
+agent-service/admin-chat-ui/src/App.tsx            — Chat UI component: transcript, composer, PendingCard.
+agent-service/admin-chat-ui/src/hooks/useAgentChat.ts — Chat state hook: send, approve, decline, stripThinkClient.
+mcp-server/src/server.ts                         — MCP server entry; Express + McpServer factory + health endpoint.
+mcp-server/src/config.ts                         — Env-driven config (port, API base URL, referer, retry policy).
+mcp-server/src/transports.ts                     — Dual-transport wiring: Streamable HTTP (/mcp) + SSE (/sse).
+mcp-server/src/rest-client.ts                    — Sole REST client; synthetic referer, retry, envelope normalization.
+mcp-server/src/state-machine/can-transition.ts   — Strict order state machine; canTransition pure function (ADR-2).
+mcp-server/src/tools/index.ts                    — Tool barrel; registerAllTools wires all six tools.
+mcp-server/src/tools/get-order.ts                — getOrder tool: lookup by orderNumber or orderId.
+mcp-server/src/tools/get-product.ts              — getProduct tool: lookup by SKU, productId, or nameQuery.
+mcp-server/src/tools/cancel-order.ts             — cancelOrder tool: preflight + canTransition + POST /cancel.
+mcp-server/src/tools/update-order-status.ts      — updateOrderStatus tool: preflight + canTransition + POST /status.
+mcp-server/src/tools/update-product-price.ts     — updateProductPrice tool: price &gt;= 0 validation + PUT variant.
+mcp-server/src/tools/update-product-description.ts — updateProductDescription tool: length-bounded PUT product.
+shared/src/chat-contract.ts                      — Shared types: ChatMessage, PendingAction, ChatResponseBody, SESSION_LIMITS.
+shared/src/error-envelope.ts                     — ErrorEnvelope interface + isErrorEnvelope type guard.
+public/admin.html                                — Admin page HTML host; mounts React island at #agent-chat-root.
+src/routes/orders.ts                             — Starter order CRUD (unmodified except tax-calculation fix).
+src/routes/products.ts                           — Starter product CRUD (unmodified).
+src/routes/promotions.ts                         — Starter promotion CRUD (unmodified).
+src/server.ts                                    — Starter Express app; enableDynamicMode middleware; serves /admin.
+src/utils/storage.ts                             — Starter JSON file storage; enableDynamicMode; seed → dynamic copy-on-write.
+</code></pre>
+<p>The <code>shared/</code> directory contains two files that establish the cross-service contract. <code>shared/src/chat-contract.ts</code> defines the <code>ChatMessage</code>, <code>PendingAction</code>, <code>ChatRequestBody</code>, <code>ChatResponseBody</code> TypeScript interfaces, along with <code>SESSION_LIMITS</code> constants (<code>MAX_TURNS: 8</code>, <code>MAX_MESSAGES: 16</code>). These types are imported by both the agent service (for handler implementation) and the chat UI (as reference for the hook&#39;s response handling). <code>shared/src/error-envelope.ts</code> defines the <code>ErrorEnvelope</code> interface with four fields: <code>humanMessage</code> (shown in chat), <code>remediationHint</code> (one-sentence next-step suggestion), <code>errorCode</code> (stable string like <code>&quot;ORDER_NOT_FOUND&quot;</code>), and optional <code>details</code> (structured context for logs, never shown to the user). The <code>isErrorEnvelope</code> type guard enables runtime validation of unknown payloads at service boundaries.</p>
+<p>The configuration layer spans two files: <code>agent-service/src/config.ts</code> and <code>mcp-server/src/config.ts</code>. Both are env-driven with sensible defaults for the dev workflow. The agent service config covers the Express port (<code>AGENT_PORT</code>, default 3200), UI origin for CORS (<code>UI_ORIGIN</code>, default <code>http://localhost:3000</code>), MCP server URL (<code>MCP_URL</code>, default <code>http://localhost:3100/mcp</code>), Ollama base URL and model (<code>OLLAMA_BASE_URL</code>, <code>OLLAMA_MODEL</code> defaulting to <code>qwen3:8b</code>), and confirmation token TTL (<code>CONFIRMATION_TTL_MS</code>, default 5 minutes). The MCP server config covers its own port (<code>MCP_PORT</code>, default 3100), the REST API base URL (<code>API_BASE_URL</code>, default <code>http://localhost:3000</code>), the synthetic referer header (<code>API_REFERER</code>, default <code>http://localhost:3000/admin</code>), request timeout (<code>API_TIMEOUT_MS</code>, default 10 seconds), and retry policy (<code>API_RETRY_MAX</code> defaulting to 2 attempts for idempotent requests, <code>API_RETRY_BASE_MS</code> defaulting to 250ms linear backoff). Both configs accept an env override object for test isolation — no <code>.env</code> file parsing, no dotenv dependency, just plain <code>process.env</code> reads with defaults.</p>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+<script>
+  hljs.highlightAll();
+
+  // Active TOC tracking
+  const links = document.querySelectorAll('.toc a');
+  const ids = Array.from(links).map(a => a.getAttribute('href').slice(1));
+  function updateActive() {
+    let current = ids[0];
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top <= 120) current = id;
+    }
+    links.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', updateActive, { passive: true });
+  updateActive();
+</script>
+</body>
+</html>
