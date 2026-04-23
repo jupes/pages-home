@@ -134,6 +134,31 @@
   .toc li a.active {
     background: var(--accent-light); color: var(--accent);
   }
+
+  /* System topology diagram */
+  .topology-figure {
+    margin: 0 0 20px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: linear-gradient(165deg, #f8fafc 0%, #eef2ff 45%, #f0fdf4 100%);
+    padding: 20px 16px;
+    overflow-x: auto;
+  }
+  .topology-figure figcaption {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .topology-figure svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+  }
 </style>
 </head>
 <body>
@@ -183,34 +208,76 @@
 <p>The most consequential design decisions: MCP as the tool transport instead of in-process adapters (ADR-7), giving the tool surface independent exercisability; a strict agent-side state machine layered on top of the permissive REST API (ADR-2); scoped two-step confirmation where only irreversible or money-touching actions are gated (ADR-3); and client-sends-history memory with server-side caps (ADR-5), avoiding server-side session persistence.</p>
 <hr>
 <h2 id="section-1">2. System topology</h2>
-<pre><code>                                       browser fetch
-  ┌─────────────────────────┐  POST /agent/chat   ┌──────────────────────────────┐
-  │  Admin Chat UI          │ ──────────────────▶  │  Agent Service               │
-  │  React island           │                      │  Express :3200               │
-  │  served from :3000      │  ◀──────────────────  │  ADK + Ollama + MCP client   │
-  │  /admin                 │  HTTP 200 JSON       │                              │
-  └─────────────────────────┘                      └──────────────┬───────────────┘
-                                                                  │
-                                                    MCP / Streamable HTTP
-                                                    POST :3100/mcp
-                                                                  │
-                                                                  ▼
-                                                   ┌──────────────────────────────┐
-                                                   │  MCP Server                  │
-                                                   │  Express :3100               │
-                                                   │  state machine + envelopes   │
-                                                   └──────────────┬───────────────┘
-                                                                  │
-                                                    HTTP JSON (GET/POST/PUT)
-                                                    synthetic /admin referer
-                                                                  │
-                                                                  ▼
-                                                   ┌──────────────────────────────┐
-                                                   │  Mock REST API (starter)     │
-                                                   │  Express :3000               │
-                                                   │  /api/orders, /api/products  │
-                                                   └──────────────────────────────┘
-</code></pre>
+<figure class="topology-figure" aria-label="Request flow from browser to mock API">
+  <figcaption>Browser fetch</figcaption>
+  <svg viewBox="0 0 640 380" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="topology-title topology-desc">
+    <title id="topology-title">System topology</title>
+    <desc id="topology-desc">Admin chat UI on port 3000 talks to Agent service on 3200; agent uses MCP on 3100; MCP calls REST API on 3000.</desc>
+    <defs>
+      <marker id="arrow-head" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/>
+      </marker>
+      <marker id="arrow-head-accent" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+      </marker>
+      <filter id="soft-shadow" x="-8%" y="-8%" width="116%" height="116%">
+        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.12"/>
+      </filter>
+    </defs>
+
+    <!-- Admin Chat UI -->
+    <g filter="url(#soft-shadow)">
+      <rect x="24" y="52" width="188" height="96" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+    </g>
+    <text x="118" y="78" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="700" fill="#1e3a8a">Admin Chat UI</text>
+    <text x="118" y="98" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#3730a3">React island · :3000</text>
+    <text x="118" y="116" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#3730a3">/admin</text>
+    <text x="118" y="136" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#64748b">HTTP 200 JSON</text>
+
+    <!-- Arrow request -->
+    <line x1="212" y1="92" x2="288" y2="92" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow-head-accent)"/>
+    <text x="250" y="84" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600" fill="#2563eb">POST /agent/chat</text>
+
+    <!-- Arrow response -->
+    <line x1="288" y1="112" x2="212" y2="112" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow-head)"/>
+    <text x="250" y="128" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#64748b">response</text>
+
+    <!-- Agent Service -->
+    <g filter="url(#soft-shadow)">
+      <rect x="296" y="52" width="220" height="96" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+    </g>
+    <text x="406" y="78" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="700" fill="#5b21b6">Agent Service</text>
+    <text x="406" y="98" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d28d9">Express :3200</text>
+    <text x="406" y="116" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#7c3aed">ADK + Ollama + MCP client</text>
+    <text x="406" y="136" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#64748b">tool calls</text>
+
+    <!-- Vertical to MCP -->
+    <line x1="406" y1="148" x2="406" y2="196" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-head)"/>
+    <text x="418" y="172" text-anchor="start" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600" fill="#c2410c">POST :3100/mcp</text>
+    <text x="418" y="184" text-anchor="start" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#64748b">MCP · Streamable HTTP</text>
+
+    <!-- MCP Server -->
+    <g filter="url(#soft-shadow)">
+      <rect x="296" y="198" width="220" height="88" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+    </g>
+    <text x="406" y="224" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="700" fill="#9a3412">MCP Server</text>
+    <text x="406" y="244" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#c2410c">Express :3100</text>
+    <text x="406" y="262" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#b45309">State machine + envelopes</text>
+    <text x="406" y="278" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#64748b">REST client</text>
+
+    <!-- Vertical to API -->
+    <line x1="406" y1="286" x2="406" y2="324" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-head)"/>
+    <text x="418" y="302" text-anchor="start" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600" fill="#059669">GET / POST / PUT</text>
+    <text x="418" y="314" text-anchor="start" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#64748b">Synthetic /admin referer</text>
+
+    <!-- Mock REST API -->
+    <g filter="url(#soft-shadow)">
+      <rect x="296" y="326" width="220" height="48" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+    </g>
+    <text x="406" y="346" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="700" fill="#14532d">Mock REST API (starter)</text>
+    <text x="406" y="362" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#047857">Express :3000 · /api/orders, /api/products</text>
+  </svg>
+</figure>
 <p><strong>Mock REST API</strong> (port 3000, entry point <code>src/server.ts</code>). The starter Express app serving seeded JSON data from <code>data/seed/</code>. Handles CRUD for orders, products, and promotions across three route files (<code>src/routes/orders.ts</code>, <code>src/routes/products.ts</code>, <code>src/routes/promotions.ts</code>). The API exposes endpoints like <code>GET /api/orders</code>, <code>GET /api/orders/number/:n</code>, <code>GET /api/products</code>, <code>POST /api/orders/:id/status</code>, <code>POST /api/orders/:id/cancel</code>, <code>PUT /api/products/:id</code>, and <code>PUT /api/products/:productId/variants/:variantId</code>. All responses are wrapped in <code>{ success: boolean, data: T }</code> envelopes.</p>
 <p>Writes are gated behind <code>enableDynamicMode()</code> (in <code>src/utils/storage.ts</code>), which is triggered by the <code>/api</code> middleware when either the HTTP method is PUT/POST/DELETE or the <code>Referer</code> header contains <code>/admin</code>:</p>
 <p><code>src/server.ts:190-198</code></p>
