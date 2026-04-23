@@ -209,7 +209,7 @@
 <hr>
 <h2 id="section-1">2. System topology</h2>
 <figure class="topology-figure" aria-label="Request flow from browser to mock API">
-  <figcaption>Browser fetch</figcaption>
+  <figcaption>Overview (ports and transport)</figcaption>
   <svg viewBox="0 0 640 380" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="topology-title topology-desc">
     <title id="topology-title">System topology</title>
     <desc id="topology-desc">Admin chat UI on port 3000 talks to Agent service on 3200; agent uses MCP on 3100; MCP calls REST API on 3000.</desc>
@@ -242,27 +242,27 @@
     <line x1="288" y1="112" x2="212" y2="112" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow-head)"/>
     <text x="250" y="128" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#64748b">response</text>
 
-    <!-- Agent Service -->
+    <!-- Agent Service (colors aligned with detailed architecture figure) -->
     <g filter="url(#soft-shadow)">
-      <rect x="296" y="52" width="220" height="96" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+      <rect x="296" y="52" width="220" height="96" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
     </g>
-    <text x="406" y="78" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="700" fill="#5b21b6">Agent Service</text>
-    <text x="406" y="98" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#6d28d9">Express :3200</text>
-    <text x="406" y="116" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#7c3aed">ADK + Ollama + MCP client</text>
+    <text x="406" y="78" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="700" fill="#92400e">Agent Service</text>
+    <text x="406" y="98" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#b45309">Express :3200</text>
+    <text x="406" y="116" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#a16207">ADK + Ollama + MCP client</text>
     <text x="406" y="136" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#64748b">tool calls</text>
 
     <!-- Vertical to MCP -->
     <line x1="406" y1="148" x2="406" y2="196" stroke="#64748b" stroke-width="2" marker-end="url(#arrow-head)"/>
-    <text x="418" y="172" text-anchor="start" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600" fill="#c2410c">POST :3100/mcp</text>
+    <text x="418" y="172" text-anchor="start" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600" fill="#059669">POST :3100/mcp</text>
     <text x="418" y="184" text-anchor="start" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#64748b">MCP · Streamable HTTP</text>
 
     <!-- MCP Server -->
     <g filter="url(#soft-shadow)">
-      <rect x="296" y="198" width="220" height="88" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+      <rect x="296" y="198" width="220" height="88" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
     </g>
-    <text x="406" y="224" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="700" fill="#9a3412">MCP Server</text>
-    <text x="406" y="244" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#c2410c">Express :3100</text>
-    <text x="406" y="262" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#b45309">State machine + envelopes</text>
+    <text x="406" y="224" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="700" fill="#065f46">MCP Server</text>
+    <text x="406" y="244" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" fill="#047857">Express :3100</text>
+    <text x="406" y="262" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#0d9488">State machine + envelopes</text>
     <text x="406" y="278" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#64748b">REST client</text>
 
     <!-- Vertical to API -->
@@ -276,6 +276,145 @@
     </g>
     <text x="406" y="346" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="700" fill="#14532d">Mock REST API (starter)</text>
     <text x="406" y="362" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#047857">Express :3000 · /api/orders, /api/products</text>
+  </svg>
+</figure>
+<figure class="topology-figure" aria-label="Detailed system architecture with layers and modules">
+  <figcaption>Detailed architecture (modules and flows)</figcaption>
+  <svg viewBox="0 0 820 680" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t2-arch-title t2-arch-desc">
+    <title id="t2-arch-title">Agentic Experience Assessment Architecture</title>
+    <desc id="t2-arch-desc">Four-process architecture: Admin Chat UI, Agent Service, MCP Server, and Mock REST API with read and confirmed-write data flows.</desc>
+
+    <defs>
+      <marker id="t2-arrow-read" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6" fill="#2563eb"/>
+      </marker>
+      <marker id="t2-arrow-grey" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6" fill="#94a3b8"/>
+      </marker>
+      <filter id="t2-shadow" x="-4%" y="-4%" width="108%" height="112%">
+        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/>
+      </filter>
+    </defs>
+
+    <text x="410" y="30" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="700" fill="#1a1a2e">System Architecture</text>
+
+    <text x="28" y="68" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#64748b" letter-spacing="0.05em">BROWSER</text>
+
+    <rect x="24" y="80" width="230" height="120" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5" filter="url(#t2-shadow)"/>
+    <rect x="24" y="80" width="230" height="30" rx="10" fill="#2563eb"/>
+    <rect x="24" y="100" width="230" height="10" fill="#2563eb"/>
+    <text x="139" y="100" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="white">Admin Chat UI</text>
+    <text x="139" y="128" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10.5" fill="#334155">React island on :3000/admin</text>
+    <text x="139" y="145" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#64748b">useAgentChat hook</text>
+    <text x="139" y="160" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#64748b">PendingCard (Approve/Decline)</text>
+    <text x="139" y="175" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#64748b">stripThinkClient</text>
+
+    <rect x="290" y="100" width="140" height="56" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4 3"/>
+    <text x="360" y="124" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="500" fill="#64748b">Vite Dev Server</text>
+    <text x="360" y="140" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#94a3b8">:5173 (dev only)</text>
+
+    <text x="28" y="238" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#64748b" letter-spacing="0.05em">AGENT LAYER</text>
+
+    <rect x="24" y="250" width="772" height="160" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" filter="url(#t2-shadow)"/>
+    <rect x="24" y="250" width="772" height="30" rx="10" fill="#f59e0b"/>
+    <rect x="24" y="270" width="772" height="10" fill="#f59e0b"/>
+    <text x="410" y="270" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="white">Agent Service — Express :3200</text>
+
+    <rect x="44" y="296" width="155" height="48" rx="6" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="121" y="316" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#92400e">POST /agent/chat</text>
+    <text x="121" y="332" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#78716c">handler.ts (Path 1 &amp; 2)</text>
+
+    <rect x="216" y="296" width="130" height="48" rx="6" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="281" y="316" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#92400e">ADK Agent</text>
+    <text x="281" y="332" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#78716c">LlmAgent + Runner</text>
+
+    <rect x="362" y="296" width="130" height="48" rx="6" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="427" y="316" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#92400e">Confirmation</text>
+    <text x="427" y="332" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#78716c">Store + Predicate</text>
+
+    <rect x="508" y="296" width="130" height="48" rx="6" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="573" y="316" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#92400e">Destructive Tools</text>
+    <text x="573" y="332" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#78716c">Gate / Auto-execute</text>
+
+    <rect x="654" y="296" width="125" height="48" rx="6" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="716" y="316" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#92400e">splitThink</text>
+    <text x="716" y="332" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#78716c">3-pass pipeline</text>
+
+    <rect x="44" y="356" width="155" height="40" rx="6" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="121" y="375" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="500" fill="#78716c">InMemorySessionService</text>
+    <text x="121" y="389" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#94a3b8">shared across requests</text>
+
+    <rect x="216" y="356" width="130" height="40" rx="6" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="281" y="375" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="500" fill="#78716c">McpToolRegistry</text>
+    <text x="281" y="389" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#94a3b8">ADK McpToolset</text>
+
+    <rect x="362" y="356" width="130" height="40" rx="6" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="427" y="375" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="500" fill="#78716c">McpForwarder</text>
+    <text x="427" y="389" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#94a3b8">direct tool calls</text>
+
+    <rect x="570" y="360" width="120" height="34" rx="17" fill="#f3e8ff" stroke="#a855f7" stroke-width="1"/>
+    <text x="630" y="381" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="600" fill="#7e22ce">Ollama :11434</text>
+    <text x="750" y="381" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#a855f7">qwen3:8b</text>
+
+    <text x="28" y="448" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#64748b" letter-spacing="0.05em">MCP LAYER</text>
+
+    <rect x="24" y="460" width="520" height="100" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="1.5" filter="url(#t2-shadow)"/>
+    <rect x="24" y="460" width="520" height="30" rx="10" fill="#10b981"/>
+    <rect x="24" y="480" width="520" height="10" fill="#10b981"/>
+    <text x="284" y="480" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="white">MCP Server — Express :3100</text>
+
+    <rect x="40" y="500" width="118" height="44" rx="6" fill="white" stroke="#d1fae5" stroke-width="1"/>
+    <text x="99" y="518" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#065f46">6 Tools</text>
+    <text x="99" y="532" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">get/cancel/update</text>
+
+    <rect x="170" y="500" width="118" height="44" rx="6" fill="white" stroke="#d1fae5" stroke-width="1"/>
+    <text x="229" y="518" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#065f46">State Machine</text>
+    <text x="229" y="532" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">canTransition()</text>
+
+    <rect x="300" y="500" width="110" height="44" rx="6" fill="white" stroke="#d1fae5" stroke-width="1"/>
+    <text x="355" y="518" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#065f46">RestClient</text>
+    <text x="355" y="532" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">retry + envelope</text>
+
+    <rect x="422" y="500" width="110" height="44" rx="6" fill="white" stroke="#d1fae5" stroke-width="1"/>
+    <text x="477" y="518" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#065f46">Dual Transport</text>
+    <text x="477" y="532" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#6b7280">/mcp + /sse</text>
+
+    <text x="28" y="598" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#64748b" letter-spacing="0.05em">DATA LAYER</text>
+
+    <rect x="24" y="610" width="520" height="58" rx="10" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5" filter="url(#t2-shadow)"/>
+    <rect x="24" y="610" width="520" height="28" rx="10" fill="#64748b"/>
+    <rect x="24" y="628" width="520" height="10" fill="#64748b"/>
+    <text x="284" y="629" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="white">Mock REST API — Express :3000 (starter code)</text>
+    <text x="284" y="652" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="10" fill="#475569">/api/orders  ·  /api/products  ·  /api/promotions  ·  seed → dynamic copy-on-write</text>
+
+    <rect x="590" y="472" width="190" height="80" rx="8" fill="#faf5ff" stroke="#c4b5fd" stroke-width="1" filter="url(#t2-shadow)"/>
+    <text x="685" y="496" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" font-weight="600" fill="#6d28d9">shared/</text>
+    <text x="685" y="514" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#7c3aed">ChatMessage, PendingAction</text>
+    <text x="685" y="528" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#7c3aed">ErrorEnvelope</text>
+    <text x="685" y="542" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#7c3aed">SESSION_LIMITS (MAX_TURNS 8)</text>
+
+    <line x1="139" y1="200" x2="139" y2="250" stroke="#2563eb" stroke-width="2" marker-end="url(#t2-arrow-read)"/>
+    <text x="148" y="228" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#2563eb" font-weight="500">POST /agent/chat</text>
+
+    <line x1="170" y1="250" x2="170" y2="200" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#t2-arrow-read)"/>
+    <text x="179" y="220" font-family="Inter, system-ui, sans-serif" font-size="8.5" fill="#2563eb">JSON response</text>
+
+    <line x1="284" y1="410" x2="284" y2="460" stroke="#10b981" stroke-width="2" marker-end="url(#t2-arrow-grey)"/>
+    <text x="293" y="440" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#10b981" font-weight="500">Streamable HTTP :3100/mcp</text>
+
+    <line x1="284" y1="560" x2="284" y2="610" stroke="#64748b" stroke-width="2" marker-end="url(#t2-arrow-grey)"/>
+    <text x="293" y="590" font-family="Inter, system-ui, sans-serif" font-size="9" fill="#64748b" font-weight="500">HTTP + synthetic referer</text>
+
+    <path d="M 281 344 L 281 358 Q 281 368 291 368 L 565 375" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4 3" fill="none" marker-end="url(#t2-arrow-grey)"/>
+
+    <rect x="590" y="590" width="200" height="78" rx="8" fill="#f8f9fb" stroke="#e2e4e8" stroke-width="1"/>
+    <text x="604" y="608" font-family="Inter, system-ui, sans-serif" font-size="10" font-weight="600" fill="#334155">Legend</text>
+    <line x1="604" y1="622" x2="628" y2="622" stroke="#2563eb" stroke-width="2"/>
+    <text x="634" y="626" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#475569">Read path (HTTP JSON)</text>
+    <line x1="604" y1="638" x2="628" y2="638" stroke="#10b981" stroke-width="2"/>
+    <text x="634" y="642" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#475569">MCP tool invocation</text>
+    <line x1="604" y1="654" x2="628" y2="654" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <text x="634" y="658" font-family="Inter, system-ui, sans-serif" font-size="9.5" fill="#475569">LLM inference (Ollama)</text>
   </svg>
 </figure>
 <p><strong>Mock REST API</strong> (port 3000, entry point <code>src/server.ts</code>). The starter Express app serving seeded JSON data from <code>data/seed/</code>. Handles CRUD for orders, products, and promotions across three route files (<code>src/routes/orders.ts</code>, <code>src/routes/products.ts</code>, <code>src/routes/promotions.ts</code>). The API exposes endpoints like <code>GET /api/orders</code>, <code>GET /api/orders/number/:n</code>, <code>GET /api/products</code>, <code>POST /api/orders/:id/status</code>, <code>POST /api/orders/:id/cancel</code>, <code>PUT /api/products/:id</code>, and <code>PUT /api/products/:productId/variants/:variantId</code>. All responses are wrapped in <code>{ success: boolean, data: T }</code> envelopes.</p>
